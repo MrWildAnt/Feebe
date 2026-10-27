@@ -1,0 +1,118 @@
+
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* ================================
+   ROOT — Global CSS Variables
+================================ */
+:root {
+    color-scheme: light;
+
+    /* Base */
+    --text: #000000;
+    --bg: #ffffff;
+
+    /* Brand */
+    --primary: #1e1b4b;
+    --secondary: #6366f1;
+    --accent: #2dd4bf;
+
+    /* Surface */
+    --surface: #f8fafc;
+    --surface-hover: #f1f5f9;
+    --border: #e2e8f0;
+
+    /* Text */
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+
+    /* Status */
+    --success: #16a34a;
+    --warning: #f59e0b;
+    --error: #dc2626;
+    --info: #0284c7;
+
+    /* Gradient */
+    --gradient-brand: linear-gradient(
+        to right,
+        #172554,
+        #6366f1,
+        #2dd4bf
+    );
+}
+
+/* ================================
+   TAILWIND CSS 4 — Theme
+================================ */
+@theme {
+    /* Colors */
+    --color-primary: #1e1b4b;
+    --color-secondary: #6366f1;
+    --color-accent: #2dd4bf;
+
+    --color-surface: #f8fafc;
+    --color-surface-hover: #f1f5f9;
+    --color-border: #e2e8f0;
+
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #64748b;
+    --color-text-muted: #94a3b8;
+
+    --color-success: #16a34a;
+    --color-warning: #f59e0b;
+    --color-error: #dc2626;
+    --color-info: #0284c7;
+
+    /* Fonts */
+    --font-pjs: "Plus Jakarta Sans", sans-serif;
+    --font-space: "Space Grotesk", sans-serif;
+
+    /* Shadows */
+    --shadow-card: 0 4px 20px rgb(15 23 42 / 8%);
+    --shadow-navbar: 0 2px 12px rgb(15 23 42 / 8%);
+
+    /* Radius */
+    --radius-card: 1.25rem;
+}
+
+/* ================================
+   BASE STYLES
+================================ */
+@layer base {
+    html {
+        font-family: var(--font-pjs);
+        scroll-behavior: smooth;
+    }
+
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+        margin: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+        font: inherit;
+    }
+
+    button,
+    a {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* ================================
+   CUSTOM UTILITIES
+================================ */
+@utility bg-brand-gradient {
+    background-image: var(--gradient-brand);
+}
+
+@utility text-brand-gradient {
+    background-image: var(--gradient-brand);
+    background-clip: text;
+    color: transparent;
+}

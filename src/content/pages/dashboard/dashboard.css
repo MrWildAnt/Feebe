@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@utility music-tittle-small {
+    @apply font-semibold text-inherit text-xl
+}
+
+@utility music-author-small {
+    @apply font-medium text-base text-inherit opacity-50
+}
+
+@utility divider {
+    @apply h-[1.5px] w-full bg-white
+}
+
+.seek {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  cursor: pointer;
+  outline: none;
+  background: linear-gradient(
+    to right,
+    currentColor var(--pct),
+    color-mix(in srgb, currentColor 25%, transparent) var(--pct)
+  );
+}
+
+.seek-volume{
+  -webkit-appearance: none;
+  appearance: none;
+  height: 9px;
+  border-radius: 9999px;
+  cursor: pointer;
+  outline: none;
+  background: linear-gradient(
+    to right,
+    currentColor var(--pct),
+    color-mix(in srgb, currentColor 25%, transparent) var(--pct)
+  );
+}
+
+.seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 0;
+  background: currentColor;
+}
+
+.seek::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 0;
+  background: currentColor;
+}
+
+.seek-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 0;
+  background: currentColor;
+}
+
+.seek-volume::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 0;
+  background: currentColor;
+}
