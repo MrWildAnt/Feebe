@@ -453,6 +453,7 @@ const HeroPlayer = ({ tracks }) => {
 
       <audio
         ref={audioRef}
+        crossOrigin="anonymous"
         src={track.audio}
         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
         onLoadedMetadata={syncDuration}
