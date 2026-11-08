@@ -1,72 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Icon } from "@iconify/react";
-// Sesuaikan path import ini dengan lokasi file tracks kamu
-import { TRACKS } from "../../data/tracks.jsx";
+import { SearchMusic } from "../../pages/search/SearchMusic.jsx";
 
-// Tinggi navbar daisyUI default (4rem). Dipakai juga sebagai tinggi canvas bars.
+// Tinggi canvas visualizer mengikuti tinggi navbar daisyUI (4rem).
 const NAV_HEIGHT = 64;
 
-// Search bar + popup recent search
-const SearchBox = () => {
-  const [open, setOpen] = useState(false);
-  const boxRef = useRef(null);
-
-  // Tutup popup kalau klik di luar search box
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (boxRef.current && !boxRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div ref={boxRef} className="relative">
-      <label className="input input-bordered flex w-64 items-center gap-2 rounded-full border-current bg-transparent text-inherit">
-        <input
-          type="text"
-          className="grow placeholder:text-inherit placeholder:opacity-70"
-          placeholder="Search..."
-          onFocus={() => setOpen(true)}
-          onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
-        />
-        <Icon icon="lucide:search" className="h-5 w-5" />
-      </label>
-
-      {open && (
-        <div className="absolute right-0 top-full z-30 mt-3 w-80 rounded-3xl bg-neutral-800/40 p-4 text-white shadow-2xl backdrop-blur-xs">
-          <h3 className="mb-3 text-base font-bold">Recent search</h3>
-
-          <ul className="flex flex-col gap-1">
-            {TRACKS.map((track) => (
-              <li key={track.id}>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition-colors hover:bg-white/10"
-                >
-                  <img
-                    src={track.cover}
-                    alt={track.title}
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-bold">{track.title}</p>
-                    <p className="truncate text-xs text-white/60">
-                      {track.author}
-                    </p>
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-};
+// Ref dan tampilan latar diteruskan dari Hero agar visualizer selaras saat scroll.
 
 export const Navbar = ({ bgRef, canvasRef, gradient, width }) => {
   return (
@@ -106,9 +45,9 @@ export const Navbar = ({ bgRef, canvasRef, gradient, width }) => {
         </a>
       </div>
 
-      {/* Search + avatar + notifikasi */}
+      {/* SearchMusic memakai data dan aksi pemutar yang sama dengan player utama. */}
       <div className="navbar-end gap-5">
-        <SearchBox />
+        <SearchMusic />
 
         <button className="btn btn-ghost btn-circle avatar border-0 hover:bg-white/20">
           <div className="w-10 rounded-full">
