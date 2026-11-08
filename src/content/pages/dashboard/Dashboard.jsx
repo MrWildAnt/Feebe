@@ -1,14 +1,12 @@
 import "../../../App.css";
 import { Sidebar } from "../../utility/universal/sidebar";
 import { LeftBar } from "../../utility/universal/LeftBar.jsx";
-import { PlayerProvider } from "../../utility/universal/PlayerContext.jsx";
 import { MusicLibrary } from "./MusicLibrary.jsx";
 import { Hero } from "./Hero";
 
 export const Dashboard = () => {
   return (
     <div className="min-h-screen w-full overflow-x-clip">
-      <PlayerProvider>
       <Sidebar />
       <LeftBar />
       <Hero />
@@ -17,7 +15,6 @@ export const Dashboard = () => {
         <h1 className="font-bold text-3xl text-white">Trending by type</h1>
         <MusicLibrary/>
       </div>
-      </PlayerProvider>
     </div>
   );
 };

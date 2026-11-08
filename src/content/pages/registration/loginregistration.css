@@ -1,0 +1,393 @@
+/* Latar dan kartu utama halaman login/registrasi. */
+.auth-page {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgb(78 121 139 / 25%), transparent 48%),
+    #1b272c;
+  color: #fff;
+}
+
+.auth-card {
+  display: grid;
+  width: min(100%, 58rem);
+  min-height: 27rem;
+  grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
+  overflow: hidden;
+  border: 2px solid #78b9e8;
+  border-radius: 0.55rem;
+  background: #d3d3d3;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 28%);
+}
+
+/* Panel kiri berisi ilustrasi piringan hitam dan teks pengenal. */
+.auth-artwork {
+  position: relative;
+  display: grid;
+  min-height: 27rem;
+  overflow: hidden;
+  place-items: center;
+  background:
+    linear-gradient(155deg, rgb(43 85 105 / 55%), transparent 55%),
+    linear-gradient(30deg, #172d36, #7295a1);
+}
+
+.auth-artwork::before,
+.auth-artwork::after {
+  position: absolute;
+  width: 23rem;
+  aspect-ratio: 1;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 50%;
+  content: "";
+}
+
+.auth-artwork::after {
+  width: 17rem;
+}
+
+.auth-artwork-glow {
+  position: absolute;
+  width: 18rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #8bc5df;
+  filter: blur(7rem);
+  opacity: 0.38;
+}
+
+.auth-record {
+  z-index: 1;
+  width: min(84%, 18rem);
+  filter: drop-shadow(0 1.25rem 1.5rem rgb(0 0 0 / 34%));
+  animation: auth-record-turn 24s linear infinite;
+}
+
+.auth-artwork-copy {
+  position: absolute;
+  z-index: 2;
+  right: 1.4rem;
+  bottom: 1.35rem;
+  left: 1.4rem;
+  text-align: center;
+  text-shadow: 0 1px 5px rgb(0 0 0 / 55%);
+}
+
+.auth-artwork-copy span {
+  color: #d5edf6;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.auth-artwork-copy p {
+  margin: 0.45rem 0 0;
+  font-family: var(--font-space);
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Panel kanan berisi logo, judul, dan form autentikasi. */
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.7rem, 4vw, 3rem);
+  background: #d3d3d3;
+  color: #fff;
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  color: #fff;
+  font-family: var(--font-space);
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.auth-brand-mark {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #7e9eac;
+  font-size: 1.55rem;
+}
+
+.auth-heading {
+  margin: 1.1rem 0 1rem;
+  text-align: center;
+}
+
+.auth-heading h1 {
+  margin: 0;
+  color: #506b76;
+  font-family: var(--font-space);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.auth-heading p {
+  margin: 0.4rem 0 0;
+  color: #66747a;
+  font-size: 0.78rem;
+}
+
+/* Input form, termasuk label yang tetap terbaca oleh screen reader. */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: #435158;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.auth-field > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.auth-field input {
+  width: 100%;
+  height: 2.65rem;
+  padding: 0 0.8rem;
+  border: 1px solid #aeb3b5;
+  border-radius: 0.35rem;
+  outline: 0;
+  background: transparent;
+  color: #26363c;
+  font-size: 0.78rem;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.auth-field input::placeholder {
+  color: #78868c;
+  opacity: 1;
+}
+
+.auth-field input:focus {
+  border-color: #6f9cad;
+  background: rgb(255 255 255 / 14%);
+  box-shadow: 0 0 0 3px rgb(111 156 173 / 20%);
+}
+
+/* Tombol reset password hanya ditampilkan pada mode login. */
+.auth-forgot {
+  align-self: flex-end;
+  margin: -0.35rem 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #74838a;
+  cursor: pointer;
+  font-size: 0.65rem;
+}
+
+.auth-forgot:hover:not(:disabled) {
+  color: #426c7c;
+  text-decoration: underline;
+}
+
+.auth-forgot:disabled {
+  cursor: wait;
+}
+
+/* Tombol submit dan status feedback dari proses autentikasi. */
+.auth-submit {
+  min-height: 2.8rem;
+  margin-top: 0.1rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: #7da3b2;
+  color: #fff;
+  cursor: pointer;
+  font-family: var(--font-space);
+  font-size: 1.05rem;
+  font-weight: 700;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #668f9f;
+}
+
+.auth-submit:disabled,
+.auth-google:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.auth-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.1rem 0;
+  border-radius: 0.35rem;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.auth-notice svg {
+  flex: 0 0 auto;
+  margin-top: 0.05rem;
+  font-size: 1rem;
+}
+
+.auth-notice.error {
+  background: #fce8e6;
+  color: #9c2f28;
+}
+
+.auth-notice.success {
+  background: #e6f4ea;
+  color: #28643a;
+}
+
+/* Pemisah "or" dan tombol masuk dengan Google. */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.1rem 0;
+  color: #78868c;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  height: 1px;
+  flex: 1;
+  background: rgb(99 116 122 / 28%);
+  content: "";
+}
+
+.auth-google {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  font-size: 0.83rem;
+  font-weight: 700;
+  transition: box-shadow 160ms ease, transform 160ms ease;
+}
+
+.auth-google:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 12%);
+}
+
+.auth-google svg {
+  font-size: 1rem;
+}
+
+/* Tautan untuk berpindah antara halaman login dan registrasi. */
+.auth-switch {
+  margin: 0.6rem 0 0;
+  color: #75838a;
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: #587d8c;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* Putar ilustrasi piringan secara perlahan. */
+@keyframes auth-record-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Di layar kecil, susun ilustrasi di atas form. */
+@media (max-width: 680px) {
+  .auth-page {
+    padding: 1.1rem;
+  }
+
+  .auth-card {
+    width: min(100%, 27rem);
+    min-height: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .auth-artwork {
+    min-height: 11rem;
+  }
+
+  .auth-record {
+    width: 9rem;
+  }
+
+  .auth-artwork::before {
+    width: 12rem;
+  }
+
+  .auth-artwork::after {
+    width: 9rem;
+  }
+
+  .auth-artwork-copy {
+    right: 0.75rem;
+    bottom: 0.55rem;
+    left: 0.75rem;
+  }
+
+  .auth-artwork-copy span {
+    font-size: 0.5rem;
+  }
+
+  .auth-artwork-copy p {
+    margin-top: 0.15rem;
+    font-size: 0.95rem;
+  }
+
+  .auth-panel {
+    padding: 1.5rem clamp(1.2rem, 7vw, 2rem);
+  }
+}
+
+/* Hormati pengaturan pengguna yang mengurangi animasi. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-record {
+    animation: none;
+  }
+}
