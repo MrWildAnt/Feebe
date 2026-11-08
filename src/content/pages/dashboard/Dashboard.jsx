@@ -1,7 +1,6 @@
 import "../../../App.css";
 import { Sidebar } from "../../utility/universal/sidebar";
 import { LeftBar } from "../../utility/universal/LeftBar.jsx";
-import { PlayerProvider } from "../../utility/universal/PlayerContext.jsx";
 import { MusicLibrary } from "./MusicLibrary.jsx";
 import { Hero } from "./Hero";
 
