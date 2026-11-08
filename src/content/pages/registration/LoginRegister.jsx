@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "../../../lib/supabase.js";
+// import { supabase } from "../../../lib/supabase.js"; // BUKA KOMENTAR saat fitur login diaktifkan
 import disk from "../../../assets/disk.png";
 import "./loginregistration.css";
 
@@ -20,6 +20,18 @@ export default function LoginRegister({ mode = "login" }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setNotice(null);
+
+    // ===== MODE UI SAJA: langsung ke dashboard (hapus blok ini saat login diaktifkan) =====
+    if (isResetting) {
+      setIsResetting(false);
+      navigate("/login", { replace: true });
+    } else {
+      navigate("/dashboard");
+    }
+    return;
+    // ===== AKHIR MODE UI SAJA =====
+
+    /* ===== LOGIN ASLI (SUPABASE): buka komentar blok ini =====
 
     // Supabase belum siap jika variabel environment belum diisi.
     if (!supabase) {
@@ -86,10 +98,19 @@ export default function LoginRegister({ mode = "login" }) {
     } finally {
       setIsSubmitting(false);
     }
+
+    ===== AKHIR LOGIN ASLI ===== */
   };
 
   const handleGoogleSignIn = async () => {
     setNotice(null);
+
+    // ===== MODE UI SAJA: langsung ke dashboard (hapus blok ini saat login diaktifkan) =====
+    navigate("/dashboard");
+    return;
+    // ===== AKHIR MODE UI SAJA =====
+
+    /* ===== LOGIN ASLI (SUPABASE): buka komentar blok ini =====
 
     if (!supabase) {
       setNotice({
@@ -117,10 +138,23 @@ export default function LoginRegister({ mode = "login" }) {
       });
       setIsSubmitting(false);
     }
+
+    ===== AKHIR LOGIN ASLI ===== */
   };
 
   const handleForgotPassword = async () => {
     setNotice(null);
+
+    // ===== MODE UI SAJA: hanya menampilkan info (hapus blok ini saat login diaktifkan) =====
+    setNotice({
+      type: "error",
+      message: "Fitur reset kata sandi belum tersedia.",
+    });
+    return;
+    // ===== AKHIR MODE UI SAJA =====
+
+    /* ===== LOGIN ASLI (SUPABASE): buka komentar blok ini =====
+
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail) {
@@ -161,6 +195,8 @@ export default function LoginRegister({ mode = "login" }) {
     } finally {
       setIsSubmitting(false);
     }
+
+    ===== AKHIR LOGIN ASLI ===== */
   };
 
   return (
