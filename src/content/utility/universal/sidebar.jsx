@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { utils } from "animejs";
 import { MusicPlayer } from "./MusicPlayer.jsx";
@@ -12,10 +13,10 @@ const SHOW_START = 0.5;
 const PANEL_W = 360;
 const GAP = 48;
 
-const clamp = (n, min, max) =>
-  Math.min(max, Math.max(min, n));
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
 export const Sidebar = () => {
+  const navigate = useNavigate();
   const { track } = usePlayer();
   const bg = useCoverColor(track.cover);
 
@@ -38,11 +39,7 @@ export const Sidebar = () => {
       const top = section.getBoundingClientRect().top;
 
       const progress = clamp((vh - top) / vh, 0, 1);
-      const show = clamp(
-        (progress - SHOW_START) / (1 - SHOW_START),
-        0,
-        1
-      );
+      const show = clamp((progress - SHOW_START) / (1 - SHOW_START), 0, 1);
 
       utils.set(el, {
         translateX: (1 - show) * closedX,
@@ -83,7 +80,8 @@ export const Sidebar = () => {
           <div className="flex justify-end items-end">
             <Icon
               icon="cuida:maximize-outline"
-              className="h-6 w-6"
+              className="h-6 w-6 hover:text-white/70 transition cursor-pointer"
+              onClick={() => navigate("/focused")}
             />
           </div>
 
@@ -101,12 +99,8 @@ export const Sidebar = () => {
             />
 
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold">
-                {track.title}
-              </p>
-              <p className="truncate text-xs text-white/60">
-                {track.author}
-              </p>
+              <p className="truncate text-sm font-bold">{track.title}</p>
+              <p className="truncate text-xs text-white/60">{track.author}</p>
             </div>
           </div>
 

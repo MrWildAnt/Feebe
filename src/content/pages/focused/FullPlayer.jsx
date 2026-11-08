@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { animate } from "animejs";
@@ -10,14 +10,81 @@ import { LYRICS } from "../../data/lyrics.js";
 
 const HAS_TIMESTAMP = /\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]/;
 
+/**
+ * Waktu "live" dari <audio> milik PlayerContext.
+ * - Saat diputar: dibaca tiap frame langsung dari audioRef (presisi).
+ * - Saat pause / seek: mengikuti currentTime dari context.
+ */
+function useLiveTime() {
+  const { audioRef, isPlaying, currentTime, track } = usePlayer();
+  const [live, setLive] = useState(() => audioRef.current?.currentTime ?? currentTime);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    let raf;
+    const tick = () => {
+      const audio = audioRef.current;
+      if (audio) setLive(audio.currentTime);
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [isPlaying, track.id, audioRef]);
+
+  return isPlaying ? live : currentTime;
+}
+
+function LyricsPane({ rawLyrics, textSub }) {
+  const { track, onSeek } = usePlayer();
+  const liveTime = useLiveTime();
+  const lyricsRef = useRef(null);
+
+  const hasLyrics = rawLyrics.trim().length > 0;
+  const isSynced = hasLyrics && HAS_TIMESTAMP.test(rawLyrics);
+
+  useEffect(() => {
+    if (lyricsRef.current) lyricsRef.current.scrollTop = 0;
+  }, [track.id]);
+
+  if (!hasLyrics) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className={`text-lg font-semibold ${textSub}`}>Lirik belum tersedia</p>
+      </div>
+    );
+  }
+
+  if (isSynced) {
+    return (
+      <SyncedLyrics
+        key={track.id}
+        lrc={rawLyrics}
+        currentTime={liveTime}
+        onSeek={onSeek}
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={lyricsRef}
+      tabIndex={0}
+      className="h-full overflow-y-auto pr-2 mask-[linear-gradient(to_bottom,transparent,black_6%,black_90%,transparent)] focus-visible:outline-none"
+    >
+      <p className="whitespace-pre-line py-[10vh] text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+        {rawLyrics}
+      </p>
+    </div>
+  );
+}
+
 export default function FullPlayer() {
   const navigate = useNavigate();
 
-  const { track, currentTime, onSeek } = usePlayer();
+  const { track } = usePlayer();
   const bg = useCoverColor(track.cover);
 
   const coverRef = useRef(null);
-  const lyricsRef = useRef(null);
 
   const isDark = bg.isDark;
   const endColor = isDark ? "#ffffff" : "#000000";
@@ -27,8 +94,6 @@ export default function FullPlayer() {
   const textSub = isDark ? "text-white/60" : "text-black/55";
 
   const rawLyrics = track.lrc ?? track.lyrics ?? LYRICS[track.id] ?? "";
-  const hasLyrics = rawLyrics.trim().length > 0;
-  const isSynced = hasLyrics && HAS_TIMESTAMP.test(rawLyrics);
 
   const lyricsVars = {
     "--lyrics-active": isDark ? "#ffffff" : "#000000",
@@ -54,14 +119,10 @@ export default function FullPlayer() {
   }, []);
 
   useEffect(() => {
-    if (lyricsRef.current) lyricsRef.current.scrollTop = 0;
-  }, [track.id]);
-
-  useEffect(() => {
     const onKey = (e) => e.key === "Escape" && goBack();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -117,30 +178,7 @@ export default function FullPlayer() {
             className="relative min-h-0 min-w-0 overflow-hidden"
             style={lyricsVars}
           >
-            {!hasLyrics ? (
-              <div className="flex h-full items-center justify-center">
-                <p className={`text-lg font-semibold ${textSub}`}>
-                  Lirik belum tersedia
-                </p>
-              </div>
-            ) : isSynced ? (
-              <SyncedLyrics
-                key={track.id}
-                lrc={rawLyrics}
-                currentTime={currentTime}
-                onSeek={onSeek}
-              />
-            ) : (
-              <div
-                ref={lyricsRef}
-                tabIndex={0}
-                className="h-full overflow-y-auto pr-2 mask-[linear-gradient(to_bottom,transparent,black_6%,black_90%,transparent)] focus-visible:outline-none"
-              >
-                <p className="whitespace-pre-line py-[10vh] text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-                  {rawLyrics}
-                </p>
-              </div>
-            )}
+            <LyricsPane rawLyrics={rawLyrics} textSub={textSub} />
           </section>
         </div>
       </div>
