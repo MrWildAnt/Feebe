@@ -10,7 +10,7 @@ import {
   uploadTrackFile,
 } from "../../data/tracks.jsx";
 
-const EMPTY_SONG = { id: null, title: "", author: "", cover: "", audio: "" };
+const EMPTY_SONG = { id: null, title: "", artist: "", author: "", cover: "", audio: "" };
 const EMPTY_AUTHOR = { id: null, name: "", bio: "" };
 
 const panel = "rounded-2xl bg-white/70 p-5 text-black shadow-xl backdrop-blur-md";
@@ -22,19 +22,23 @@ const pill =
 export const AdminDashboard = ({ currentTrack }) => {
   const [songs, setSongs] = useState([]);
   const [authors, setAuthors] = useState([]);
-  const [playing, setPlaying] = useState(null); // track being played here
+  const [playing, setPlaying] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bg, setBg] = useState({ hex: "#7a98a8", isDark: false });
-  const [songForm, setSongForm] = useState(null); // null = modal closed
+  const [songForm, setSongForm] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
   const [audioFile, setAudioFile] = useState(null);
   const [authorForm, setAuthorForm] = useState(EMPTY_AUTHOR);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState(null); // { text, error }
-  const audioRef = useRef(null);
+  const [msg, setMsg] = useState(null);
 
-  // the track that drives the background color:
-  // the one playing here, else the prop from the main player, else the first song
+  // State untuk Realtime Chart Analytics
+  // Set default ke angka 0 semua (kosong) agar masuk ke empty state dulu
+  const [chartData, setChartData] = useState([]);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [liveActiveCount, setLiveActiveCount] = useState(0);
+
+  const audioRef = useRef(null);
   const active = playing || currentTrack || songs[0];
 
   const notify = (text, error = false) => {
@@ -42,7 +46,6 @@ export const AdminDashboard = ({ currentTrack }) => {
     setTimeout(() => setMsg(null), 3500);
   };
 
-  // ---------- READ ----------
   const loadSongs = async () => {
     try {
       setSongs(await fetchTracks());
@@ -60,21 +63,47 @@ export const AdminDashboard = ({ currentTrack }) => {
     setAuthors(data);
   };
 
+  // Load Analytics & Setup Realtime Channel
+  const loadAnalytics = async () => {
+    try {
+      const { data: sessions } = await supabase.from("active_sessions").select("*");
+      if (sessions) {
+        setLiveActiveCount(sessions.length);
+      }
+      
+      // Jika nanti teman kamu sudah isi tabel log/analytics di supabase, fetch datanya ke sini.
+      // const { data: logs } = await supabase.from("listening_logs").select("*");
+      // if (logs && logs.length > 0) { setChartData(logs); }
+    } catch (e) {
+      console.error("Error analytics:", e);
+    }
+  };
+
   useEffect(() => {
     loadSongs();
     loadAuthors();
+    loadAnalytics();
+
+    const channel = supabase
+      .channel("admin-chart-analytics")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "active_sessions" },
+        () => loadAnalytics()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  // ---------- background from cover color ----------
   useEffect(() => {
     if (!active?.cover) return;
     const fac = new FastAverageColor();
     let cancelled = false;
     fac
-      .getColorAsync(active.cover, {
-        algorithm: "dominant",
-        crossOrigin: "anonymous",
-      })
+      .getColorAsync(active.cover, { algorithm: "dominant", crossOrigin: "anonymous" })
       .then((c) => !cancelled && setBg({ hex: c.hex, isDark: c.isDark }))
       .catch(() => {});
     return () => {
@@ -83,7 +112,6 @@ export const AdminDashboard = ({ currentTrack }) => {
     };
   }, [active?.cover]);
 
-  // ---------- mini player ----------
   const togglePlay = (song) => {
     if (playing?.id === song.id) {
       setIsPlaying((v) => !v);
@@ -100,11 +128,10 @@ export const AdminDashboard = ({ currentTrack }) => {
     else a.pause();
   }, [isPlaying, playing]);
 
-  // ---------- SONG: create / update / delete ----------
   const saveSong = async (e) => {
     e.preventDefault();
-    if (!songForm.title.trim() || !songForm.author) {
-      return notify("Title and author are required.", true);
+    if (!songForm.title.trim() || !songForm.artist?.trim() || !songForm.author) {
+      return notify("Title, artist, and author are required.", true);
     }
     const isNew = songForm.id === null;
     if (isNew && (!coverFile || !audioFile)) {
@@ -115,6 +142,7 @@ export const AdminDashboard = ({ currentTrack }) => {
     try {
       const data = {
         title: songForm.title.trim(),
+        artist: songForm.artist.trim(),
         author: songForm.author,
         cover: coverFile ? await uploadTrackFile("covers", coverFile) : songForm.cover,
         audio: audioFile ? await uploadTrackFile("music", audioFile) : songForm.audio,
@@ -153,7 +181,6 @@ export const AdminDashboard = ({ currentTrack }) => {
     setAudioFile(null);
   };
 
-  // ---------- AUTHOR: create / update / delete ----------
   const saveAuthor = async (e) => {
     e.preventDefault();
     const name = authorForm.name.trim();
@@ -180,14 +207,26 @@ export const AdminDashboard = ({ currentTrack }) => {
     loadAuthors();
   };
 
-  const endColor = bg.isDark ? "#ffffff" : "#000000";
+  const endColor = bg.isDark ? "#E0F2FE" : "#000000";
+
+  // Kalkulasi koordinat SVG Line Chart (hanya jalan kalau data ada)
+  const maxUsers = chartData.length > 0 ? Math.max(...chartData.map((d) => d.users), 10) : 10;
+  const chartHeight = 160;
+  const chartWidth = 600;
+  const points = chartData.length > 0 ? chartData
+    .map((d, i) => {
+      const x = (i / (chartData.length - 1)) * chartWidth;
+      const y = chartHeight - (d.users / maxUsers) * (chartHeight - 20) - 10;
+      return `${x},${y}`;
+    })
+    .join(" ") : "";
 
   return (
     <div
       className="min-h-screen w-full p-6 transition-[background] duration-1000 md:p-10"
       style={{
         background: `linear-gradient(135deg, ${bg.hex} 0%, ${endColor} 300%)`,
-        color: bg.isDark ? "#fff" : "#000",
+        color: bg.isDark ? "#E0F2FE" : "#000",
       }}
     >
       <audio
@@ -203,7 +242,7 @@ export const AdminDashboard = ({ currentTrack }) => {
           <div className="flex items-center gap-3 rounded-full bg-white/70 py-1 pr-4 pl-1 text-black backdrop-blur-md">
             <img src={active.cover} alt="" className="size-9 rounded-full object-cover" />
             <span className="text-sm font-medium">
-              {active.title} · {active.author}
+              {active.title} · {active.artist || active.author}
             </span>
           </div>
         )}
@@ -221,7 +260,7 @@ export const AdminDashboard = ({ currentTrack }) => {
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        {/* ---------------- Manage song ---------------- */}
+        {/* Manage song */}
         <section className={panel}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-bold">Manage songs</h2>
@@ -234,9 +273,7 @@ export const AdminDashboard = ({ currentTrack }) => {
           </div>
 
           {songs.length === 0 ? (
-            <p className="py-10 text-center text-sm opacity-60">
-              No songs yet. Add the first one.
-            </p>
+            <p className="py-10 text-center text-sm opacity-60">No songs yet. Add the first one.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
@@ -253,9 +290,7 @@ export const AdminDashboard = ({ currentTrack }) => {
                   {songs.map((s) => (
                     <tr
                       key={s.id}
-                      className={`border-b border-black/10 ${
-                        playing?.id === s.id ? "bg-black/5" : ""
-                      }`}
+                      className={`border-b border-black/10 ${playing?.id === s.id ? "bg-black/5" : ""}`}
                     >
                       <td className="py-2 pr-3 font-semibold">{s.id}</td>
                       <td className="pr-3">
@@ -283,7 +318,7 @@ export const AdminDashboard = ({ currentTrack }) => {
                         <div className="flex justify-end gap-2">
                           <button
                             className={pill}
-                            onClick={() => setSongForm({ ...s })}
+                            onClick={() => setSongForm({ ...s, artist: s.artist || "" })}
                             aria-label={`Edit ${s.title}`}
                           >
                             <Icon icon="mdi:pencil" /> Edit
@@ -305,12 +340,10 @@ export const AdminDashboard = ({ currentTrack }) => {
           )}
         </section>
 
-        {/* ---------------- Authors ---------------- */}
+        {/* Authors */}
         <div className="flex flex-col gap-6">
           <form onSubmit={saveAuthor} className={`${panel} flex flex-col gap-3`}>
-            <h2 className="text-xl font-bold">
-              {authorForm.id ? "Edit author" : "Add author"}
-            </h2>
+            <h2 className="text-xl font-bold">{authorForm.id ? "Edit author" : "Add author"}</h2>
             <input
               className={field}
               placeholder="Name"
@@ -330,7 +363,8 @@ export const AdminDashboard = ({ currentTrack }) => {
                 </button>
               )}
               <button type="submit" className={pill}>
-                <Icon icon="mdi:plus" /> {authorForm.id ? "Save changes" : "Add author"}
+                <Icon icon={authorForm.id ? "mdi:check" : "mdi:plus"} />{" "}
+                {authorForm.id ? "Save changes" : "Add author"}
               </button>
             </div>
           </form>
@@ -344,7 +378,8 @@ export const AdminDashboard = ({ currentTrack }) => {
                 {authors.map((a) => (
                   <li
                     key={a.id}
-                    className="flex items-center justify-between rounded-xl px-2 py-1.5 hover:bg-black/5"
+                    onClick={() => setAuthorForm({ id: a.id, name: a.name, bio: a.bio ?? "" })}
+                    className="flex cursor-pointer items-center justify-between rounded-xl px-2 py-1.5 hover:bg-black/5"
                   >
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-black/10">
@@ -358,14 +393,20 @@ export const AdminDashboard = ({ currentTrack }) => {
                     <div className="flex gap-1">
                       <button
                         className="cursor-pointer rounded-full p-1.5 hover:bg-black/10"
-                        onClick={() => setAuthorForm({ id: a.id, name: a.name, bio: a.bio ?? "" })}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setAuthorForm({ id: a.id, name: a.name, bio: a.bio ?? "" });
+                        }}
                         aria-label={`Edit ${a.name}`}
                       >
                         <Icon icon="mdi:pencil" />
                       </button>
                       <button
                         className="cursor-pointer rounded-full p-1.5 hover:bg-black/10"
-                        onClick={() => removeAuthor(a)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeAuthor(a);
+                        }}
                         aria-label={`Delete ${a.name}`}
                       >
                         <Icon icon="mdi:trash-can-outline" />
@@ -379,7 +420,125 @@ export const AdminDashboard = ({ currentTrack }) => {
         </div>
       </div>
 
-      {/* ---------------- Song modal (add / edit) ---------------- */}
+      {/* ---------------- REALTIME PLATFORM ACTIVITY (EMPTY STATE KETIKA BELUM ADA DATA) ---------------- */}
+      <section className={`mt-6 ${panel}`}>
+        <div className="mb-4 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+          <div>
+            <h2 className="text-xl font-bold">Realtime Platform Activity</h2>
+            <p className="text-xs opacity-60">Pantau jumlah pengguna aktif dan durasi streaming harian</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="rounded-xl bg-black/5 px-3 py-1.5 text-xs font-semibold">
+              Online Now: <span className="text-emerald-600">{liveActiveCount} users</span>
+            </div>
+            <span className="flex items-center gap-2 text-xs font-semibold">
+              <span className="relative flex size-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex size-3 rounded-full bg-emerald-500"></span>
+              </span>
+              Live Sync
+            </span>
+          </div>
+        </div>
+
+        {/* Kondisi: Jika chartData kosong, tampilkan Empty State yang bersih */}
+        {chartData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-black/5 text-2xl opacity-50">
+              <Icon icon="mdi:chart-line-variant" />
+            </div>
+            <p className="text-sm font-semibold">Belum ada data aktivitas atau riwayat pemutaran</p>
+            <p className="mt-1 text-xs opacity-50 max-w-sm">
+              Grafik aktivitas dan durasi streaming akan otomatis muncul di sini begitu ada pengguna yang mendengarkan musik di Feebe.
+            </p>
+          </div>
+        ) : (
+          /* Chart Container (Hanya muncul kalau data sudah ada) */
+          <div className="relative w-full overflow-x-auto pt-4">
+            <div className="relative h-48 w-full min-w-[500px]">
+              <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="h-full w-full overflow-visible">
+                {[0, 0.33, 0.66, 1].map((ratio, idx) => (
+                  <line
+                    key={idx}
+                    x1="0"
+                    y1={chartHeight * ratio}
+                    x2={chartWidth}
+                    y2={chartHeight * ratio}
+                    stroke="currentColor"
+                    strokeOpacity="0.08"
+                    strokeDasharray="4 4"
+                  />
+                ))}
+
+                <polyline
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  className="text-black/80 transition-all duration-300"
+                  points={points}
+                />
+
+                {chartData.map((d, i) => {
+                  const x = (i / (chartData.length - 1)) * chartWidth;
+                  const y = chartHeight - (d.users / maxUsers) * (chartHeight - 20) - 10;
+                  const isHovered = hoveredIndex === i;
+
+                  return (
+                    <g key={i} className="cursor-pointer" onMouseEnter={() => setHoveredIndex(i)} onMouseLeave={() => setHoveredIndex(null)}>
+                      {isHovered && (
+                        <line
+                          x1={x}
+                          y1="0"
+                          x2={x}
+                          y2={chartHeight}
+                          stroke="currentColor"
+                          strokeDasharray="2 2"
+                          strokeOpacity="0.4"
+                        />
+                      )}
+
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r={isHovered ? "6" : "4"}
+                        className="fill-white stroke-black transition-all duration-200"
+                        strokeWidth="2.5"
+                      />
+
+                      {isHovered && (
+                        <foreignObject x={x - 60} y={y - 75} width="120" height="70" className="overflow-visible z-50">
+                          <div className="rounded-xl bg-black px-3 py-2 text-white shadow-xl backdrop-blur-md">
+                            <p className="text-[10px] opacity-70">{d.day}</p>
+                            <p className="text-xs font-bold">{d.users} Active Users</p>
+                            <p className="text-[10px] text-emerald-400">{d.time} mins listened</p>
+                          </div>
+                        </foreignObject>
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            <div className="mt-4 flex justify-between px-2 text-xs font-medium opacity-60">
+              {chartData.map((d, i) => (
+                <span
+                  key={i}
+                  className={`cursor-pointer transition hover:font-bold hover:opacity-100 ${
+                    hoveredIndex === i ? "font-bold text-black opacity-100" : ""
+                  }`}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                  onMouseLeave={() => setHoveredIndex(null)}
+                >
+                  {d.day}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Song modal (add / edit) */}
       {songForm && (
         <div
           className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4"
@@ -390,9 +549,7 @@ export const AdminDashboard = ({ currentTrack }) => {
             onClick={(e) => e.stopPropagation()}
             className={`${panel} flex w-full max-w-md flex-col gap-3 bg-white!`}
           >
-            <h2 className="text-xl font-bold">
-              {songForm.id === null ? "Add song" : "Edit song"}
-            </h2>
+            <h2 className="text-xl font-bold">{songForm.id === null ? "Add song" : "Edit song"}</h2>
 
             <input
               className={field}
@@ -401,13 +558,20 @@ export const AdminDashboard = ({ currentTrack }) => {
               onChange={(e) => setSongForm({ ...songForm, title: e.target.value })}
             />
 
+            <input
+              className={field}
+              placeholder="Artist Name (e.g. Oasis, Twice)"
+              value={songForm.artist || ""}
+              onChange={(e) => setSongForm({ ...songForm, artist: e.target.value })}
+            />
+
             <select
               className={field}
               value={songForm.author}
               onChange={(e) => setSongForm({ ...songForm, author: e.target.value })}
             >
               <option value="" disabled>
-                Choose an author
+                Choose author
               </option>
               {authors.map((a) => (
                 <option key={a.id} value={a.name}>
