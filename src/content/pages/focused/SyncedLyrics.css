@@ -1,0 +1,71 @@
+.synced-lyrics {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 35vh 0.5rem 55vh 0;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 12%, black 85%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 12%, black 85%, transparent);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 12%,
+    black 85%,
+    transparent
+  );
+}
+.synced-lyrics::-webkit-scrollbar {
+  display: none;
+}
+
+.synced-line {
+  display: block;
+  width: 100%;
+  margin: 0 0 0.9em;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--lyrics-size);
+  font-weight: 700;
+  line-height: 1.2;
+
+  color: var(--lyrics-idle);
+  transform: scale(0.88);
+  transform-origin: left center;
+  filter: blur(calc(var(--d, 0) * 0.7px));
+  will-change: transform, filter, color;
+
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) var(--delay, 0ms),
+    color 0.4s ease var(--delay, 0ms),
+    filter 0.5s ease var(--delay, 0ms);
+}
+
+.synced-line:hover {
+  color: var(--lyrics-hover);
+  filter: blur(0);
+}
+
+.synced-line.is-active {
+  color: var(--lyrics-active);
+  transform: scale(1);
+  filter: blur(0);
+  transition-delay: 0ms;
+}
+
+.synced-line:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .synced-line {
+    transition: color 0.2s ease;
+    transform: none;
+    filter: none;
+  }
+}

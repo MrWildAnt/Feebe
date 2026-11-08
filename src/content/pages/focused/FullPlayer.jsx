@@ -5,13 +5,15 @@ import { animate } from "animejs";
 import { MusicPlayer } from "../../utility/universal/MusicPlayer.jsx";
 import { usePlayer } from "../../utility/universal/PlayerContext.jsx";
 import { useCoverColor } from "../../utility/universal/useCoverColor.jsx";
+import SyncedLyrics from "./SyncedLyrics.jsx";
+import { LYRICS } from "../../data/lyrics.js";
 
-const DUMMY_LYRICS =
-  "wajahmu gemilang\npelan\nlembut menembus\nhutan hujan\nku mencintaimu dalam\ngaun baja\npada\nperayaan~perayaan\n\nkau\nmembuatku\nmenjadi\ntak berdaya\n\nkau\nmembuatku\nmenjadi\ntak berdaya\n\nkau\nmembuatku\nmenjadi\ntak berdaya";
+const HAS_TIMESTAMP = /\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]/;
 
 export default function FullPlayer() {
   const navigate = useNavigate();
-  const { track } = usePlayer();
+
+  const { track, currentTime, onSeek } = usePlayer();
   const bg = useCoverColor(track.cover);
 
   const coverRef = useRef(null);
@@ -24,13 +26,23 @@ export default function FullPlayer() {
   const textMain = isDark ? "text-white/90" : "text-black/80";
   const textSub = isDark ? "text-white/60" : "text-black/55";
 
-  // Kembali ke halaman sebelumnya; kalau dibuka langsung lewat URL, ke beranda
+  const rawLyrics = track.lrc ?? track.lyrics ?? LYRICS[track.id] ?? "";
+  const hasLyrics = rawLyrics.trim().length > 0;
+  const isSynced = hasLyrics && HAS_TIMESTAMP.test(rawLyrics);
+
+  const lyricsVars = {
+    "--lyrics-active": isDark ? "#ffffff" : "#000000",
+    "--lyrics-on-active": isDark ? "#000000" : "#ffffff",
+    "--lyrics-idle": isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.32)",
+    "--lyrics-hover": isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
+    "--lyrics-size": "clamp(1.75rem, 4vw, 3rem)",
+  };
+
   const goBack = () => {
     if (window.history.length > 1) navigate(-1);
     else navigate("/");
   };
 
-  // Animasi cover saat halaman dibuka
   useEffect(() => {
     if (!coverRef.current) return;
     animate(coverRef.current, {
@@ -41,17 +53,15 @@ export default function FullPlayer() {
     });
   }, []);
 
-  // Reset scroll lirik saat ganti lagu
   useEffect(() => {
     if (lyricsRef.current) lyricsRef.current.scrollTop = 0;
-  }, [track.title]);
+  }, [track.id]);
 
-  // ESC untuk kembali
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && goBack();
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, []);
 
   return (
@@ -59,7 +69,6 @@ export default function FullPlayer() {
       className={`relative h-dvh w-full overflow-hidden transition-colors duration-1000 ${textMain}`}
       style={{ background: gradient }}
     >
-      {/* Cover buram sebagai tekstur latar */}
       <img
         src={track.cover}
         alt=""
@@ -68,7 +77,6 @@ export default function FullPlayer() {
       />
 
       <div className="relative mx-auto flex h-full max-w-7xl flex-col px-6 py-6 md:px-12 md:py-10">
-        {/* Header */}
         <header className="flex items-center justify-between">
           <button
             type="button"
@@ -83,9 +91,7 @@ export default function FullPlayer() {
           <p className={`text-sm ${textSub}`}>Sedang diputar</p>
         </header>
 
-        {/* Konten */}
         <div className="mt-6 grid min-h-0 flex-1 grid-cols-1 gap-8 lg:grid-cols-[minmax(0,420px)_1fr] lg:gap-16">
-          {/* Kiri: cover + info + kontrol */}
           <section className="flex min-h-0 flex-col justify-center gap-6">
             <img
               ref={coverRef}
@@ -98,9 +104,7 @@ export default function FullPlayer() {
               <h1 className="truncate text-2xl font-bold sm:text-3xl">
                 {track.title}
               </h1>
-              <p className={`truncate text-base ${textSub}`}>
-                {track.author}
-              </p>
+              <p className={`truncate text-base ${textSub}`}>{track.author}</p>
             </div>
 
             <div className="rounded-3xl bg-white/20 p-4 backdrop-blur-sm">
@@ -108,16 +112,35 @@ export default function FullPlayer() {
             </div>
           </section>
 
-          {/* Kanan: lirik */}
           <section
-            ref={lyricsRef}
-            tabIndex={0}
             aria-label="Lirik"
-            className="min-h-0 overflow-y-auto pr-2 mask-[linear-gradient(to_bottom,transparent,black_6%,black_90%,transparent)] focus-visible:outline-none"
+            className="relative min-h-0 min-w-0 overflow-hidden"
+            style={lyricsVars}
           >
-            <p className="whitespace-pre-line py-[10vh] text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-              {track.lyrics ?? DUMMY_LYRICS}
-            </p>
+            {!hasLyrics ? (
+              <div className="flex h-full items-center justify-center">
+                <p className={`text-lg font-semibold ${textSub}`}>
+                  Lirik belum tersedia
+                </p>
+              </div>
+            ) : isSynced ? (
+              <SyncedLyrics
+                key={track.id}
+                lrc={rawLyrics}
+                currentTime={currentTime}
+                onSeek={onSeek}
+              />
+            ) : (
+              <div
+                ref={lyricsRef}
+                tabIndex={0}
+                className="h-full overflow-y-auto pr-2 mask-[linear-gradient(to_bottom,transparent,black_6%,black_90%,transparent)] focus-visible:outline-none"
+              >
+                <p className="whitespace-pre-line py-[10vh] text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+                  {rawLyrics}
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </div>

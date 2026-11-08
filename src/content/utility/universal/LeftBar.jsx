@@ -119,7 +119,7 @@ export const LeftBar = () => {
             title={pl.name}
             aria-label={`Playlist ${pl.name}`}
             style={{ opacity: 0 }}
-            className={`size-14 shrink-0 cursor-pointer overflow-hidden rounded-xl bg-neutral-700 ring-2 transition-[box-shadow] duration-300 ${
+            className={`size-14 shrink-0 cursor-pointer overflow-hidden rounded-xl bg-neutral-700 ring-2 transition-shadow duration-300 ${
               pl.id === activeId
                 ? "ring-white"
                 : "ring-transparent hover:ring-white/50"
