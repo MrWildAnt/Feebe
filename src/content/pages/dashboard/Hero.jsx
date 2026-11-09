@@ -36,6 +36,82 @@ const DOCK_AT = 0.98; // scroll progress (0 to 1) at which the disk counts as do
 // Navbar settings
 const NAV_FADE_START = 0.6; // navbar bg + bars start fading in at this scroll progress
 
+// Running text: hanya bergerak kalau isinya lebih lebar dari kotak (anime.js)
+const Marquee = ({ children, className = "", speed = 60, gap = 64 }) => {
+  const boxRef = useRef(null);
+  const trackRef = useRef(null);
+  const textRef = useRef(null);
+  const [overflow, setOverflow] = useState(false);
+  const [textW, setTextW] = useState(0);
+
+  // Ukur lebar teks vs kotak (dan ukur ulang kalau ukurannya berubah)
+  useEffect(() => {
+    const box = boxRef.current;
+    const text = textRef.current;
+    if (!box || !text) return;
+
+    const measure = () => {
+      setTextW(text.offsetWidth);
+      setOverflow(text.offsetWidth > box.clientWidth);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(box);
+    ro.observe(text);
+    return () => ro.disconnect();
+  }, []);
+
+  // Jalankan animasi hanya kalau teks kepanjangan
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!overflow || !el || !textW) return;
+
+    const distance = textW + gap;
+    const animation = animate(el, {
+      translateX: [0, -distance],
+      duration: (distance / speed) * 1000,
+      ease: "linear",
+      loop: true,
+    });
+
+    return () => {
+      animation.cancel();
+      el.style.transform = "";
+    };
+  }, [overflow, textW, speed, gap]);
+
+  return (
+    <div
+      ref={boxRef}
+      className={`overflow-hidden ${className} ${
+        overflow
+          ? "mask-[linear-gradient(to_right,transparent,black_4%,black_96%,transparent)]"
+          : ""
+      }`}
+    >
+      <div ref={trackRef} className="flex w-max">
+        <div
+          ref={textRef}
+          className="flex shrink-0 gap-3 whitespace-nowrap"
+          style={{ marginRight: gap }}
+        >
+          {children}
+        </div>
+        {overflow && (
+          <div
+            aria-hidden="true"
+            className="flex shrink-0 gap-3 whitespace-nowrap"
+            style={{ marginRight: gap }}
+          >
+            {children}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // Loads the tracks (local now, Supabase later), then mounts the player
 export const Hero = () => {
   const [tracks, setTracks] = useState(null);
@@ -500,13 +576,13 @@ const HeroPlayer = ({ tracks }) => {
         >
           Now Playing
         </h2>
-        <div className="flex gap-3">
+        <Marquee key={track.id} className="w-170">
           <h1 className="font-bold text-7xl text-inherit">{track.title}</h1>
           <h1 className="font-bold text-7xl text-inherit">-</h1>
           <h3 className="font-semibold text-7xl text-inherit">
             {track.author}
           </h3>
-        </div>
+        </Marquee>
 
         {/* addons*/}
         <div className="flex gap-3 items-center">
