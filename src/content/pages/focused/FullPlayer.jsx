@@ -17,7 +17,9 @@ const HAS_TIMESTAMP = /\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]/;
  */
 function useLiveTime() {
   const { audioRef, isPlaying, currentTime, track } = usePlayer();
-  const [live, setLive] = useState(() => audioRef.current?.currentTime ?? currentTime);
+  const [live, setLive] = useState(
+    () => audioRef.current?.currentTime ?? currentTime,
+  );
 
   useEffect(() => {
     if (!isPlaying) return;
@@ -49,7 +51,9 @@ function LyricsPane({ rawLyrics, textSub }) {
   if (!hasLyrics) {
     return (
       <div className="flex h-full items-center justify-center">
-        <p className={`text-lg font-semibold ${textSub}`}>Lirik belum tersedia</p>
+        <p className={`text-lg font-semibold ${textSub}`}>
+          Lirik belum tersedia
+        </p>
       </div>
     );
   }

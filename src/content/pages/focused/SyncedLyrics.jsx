@@ -9,7 +9,9 @@ const MANUAL_SCROLL_PAUSE = 3000; // ms, jeda auto-scroll setelah user scroll se
 function parseLrc(lrc) {
   const lines = [];
   for (const raw of lrc.split(/\r?\n/)) {
-    const stamps = [...raw.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g)];
+    const stamps = [
+      ...raw.matchAll(/\[(\d{1,2}):(\d{2})(?:[.:](\d{1,3}))?\]/g),
+    ];
     if (!stamps.length) continue;
     const text = raw.replace(/\[[^\]]*\]/g, "").trim();
     if (!text) continue;

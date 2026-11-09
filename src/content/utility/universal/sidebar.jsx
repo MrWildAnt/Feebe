@@ -5,9 +5,13 @@ import { utils } from "animejs";
 import { MusicPlayer } from "./MusicPlayer.jsx";
 import { usePlayer } from "./PlayerContext.jsx";
 import { useCoverColor } from "./useCoverColor.jsx";
+import SyncedLyrics from "../../pages/focused/SyncedLyrics.jsx";
+import { LYRICS } from "../../data/lyrics.js";
 
 const DUMMY_LYRICS =
   "wajahmu gemilang\npelan\nlembut menembus\nhutan hujan\nku mencintaimu dalam\ngaun baja\npada\nperayaan~perayaan\n\nkau\nmembuatku\nmenjadi\ntak berdaya\n\nkau\nmembuatku\nmenjadi\ntak berdaya\n\nkau\nmembuatku\nmenjadi\ntak berdaya";
+
+const HAS_TIMESTAMP = /\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]/;
 
 const SHOW_START = 0.5;
 const PANEL_W = 360;
@@ -17,15 +21,35 @@ const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
 export const Sidebar = () => {
   const navigate = useNavigate();
-  const { track } = usePlayer();
+  const { track, currentTime, onSeek } = usePlayer();
   const bg = useCoverColor(track.cover);
 
   const wrapRef = useRef(null);
+  const lyricsRef = useRef(null);
 
   const closedX = PANEL_W + GAP;
 
-  const endColor = bg.isDark ? "#ffffff" : "#000000";
+  const isDark = bg.isDark;
+  const endColor = isDark ? "#ffffff" : "#000000";
   const lyricsGradient = `linear-gradient(135deg, ${bg.hex} 0%, ${endColor} 300%)`;
+
+  const rawLyrics =
+    track.lrc ?? track.lyrics ?? LYRICS[track.id] ?? DUMMY_LYRICS;
+  const isSynced = HAS_TIMESTAMP.test(rawLyrics);
+
+  // Warna & ukuran lirik (dipakai SyncedLyrics.css)
+  const lyricsVars = {
+    "--lyrics-active": isDark ? "#ffffff" : "#000000",
+    "--lyrics-on-active": isDark ? "#000000" : "#ffffff",
+    "--lyrics-idle": isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.32)",
+    "--lyrics-hover": isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
+    "--lyrics-size": "1.5rem",
+  };
+
+  // Lagu ganti -> lirik biasa kembali ke atas
+  useEffect(() => {
+    if (lyricsRef.current) lyricsRef.current.scrollTop = 0;
+  }, [track.id]);
 
   // Animasi muncul setelah melewati Hero
   useEffect(() => {
@@ -73,7 +97,7 @@ export const Sidebar = () => {
       <div className="w-90 h-full text-white">
         <div
           className={`h-100 rounded-t-3xl p-6 flex flex-col gap-4 transition-colors duration-1000 ${
-            bg.isDark ? "text-white/90" : "text-black/80"
+            isDark ? "text-white/90" : "text-black/80"
           }`}
           style={{ background: lyricsGradient }}
         >
@@ -85,9 +109,30 @@ export const Sidebar = () => {
             />
           </div>
 
-          <p className="text-2xl overflow-y-auto leading-tight font-bold whitespace-pre-line">
-            {track.lyrics ?? DUMMY_LYRICS}
-          </p>
+          {/* Lirik */}
+          <div
+            className="relative min-h-0 flex-1 overflow-hidden"
+            style={lyricsVars}
+          >
+            {isSynced ? (
+              <SyncedLyrics
+                key={track.id}
+                lrc={rawLyrics}
+                currentTime={currentTime}
+                onSeek={onSeek}
+              />
+            ) : (
+              <div
+                ref={lyricsRef}
+                tabIndex={0}
+                className="h-full overflow-y-auto pr-2 mask-[linear-gradient(to_bottom,transparent,black_6%,black_90%,transparent)] focus-visible:outline-none"
+              >
+                <p className="text-2xl leading-tight font-bold whitespace-pre-line">
+                  {rawLyrics}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex h-50 flex-col gap-4 rounded-b-3xl bg-white/20 p-4 backdrop-blur-sm">

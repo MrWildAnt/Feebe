@@ -93,12 +93,8 @@ export const MusicLibrary = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
   return (
-    <section className="relative w-full max-w-250 h-[620px] overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-br from-[#292727] via-[#171616] to-[#101010] p-7 text-white shadow-2xl">
+    <section className="relative w-full max-w-250 h-[620px] overflow-hidden rounded-[28px] border border-white/10 p-7 bg-white/20 text-white shadow-2xl">
 
-      {/* Scrollbar */}
-      <div className="absolute right-5 top-14 bottom-10 w-[5px] rounded-full bg-white/20">
-        <div className="h-1/2 w-full rounded-full bg-white/80" />
-      </div>
 
       <div className="h-full overflow-y-auto pr-7 scrollbar-hide">
 
