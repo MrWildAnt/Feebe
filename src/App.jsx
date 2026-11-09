@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Dashboard from './content/pages/dashboard/Dashboard.jsx'
 import FullPlayer from './content/pages/focused/FullPlayer.jsx'
 import { PlayerProvider } from "./content/utility/universal/PlayerContext.jsx";
+import SearchMusic from './content/pages/search/SearchMusic.jsx';
 // import AdminDashboard from './content/pages/musiccontrol/AdminDashboard.jsx'
 
 function App() {

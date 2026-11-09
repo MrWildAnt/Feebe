@@ -51,7 +51,7 @@ export const Navbar = ({ bgRef, canvasRef, gradient, width }) => {
 
         <button className="btn btn-ghost btn-circle avatar border-0 hover:bg-white/20">
           <div className="w-10 rounded-full">
-            <img alt="Profile" src="/avatar.png" />
+            <img src="../../../assets/cover/apt.png" className="image-full" />
           </div>
         </button>
 

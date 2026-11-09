@@ -52,7 +52,7 @@ export const SearchMusic = () => {
   const visibleTracks = query.trim() ? results : recentTracks;
 
   return (
-    <div ref={boxRef} className="relative">
+    <div ref={boxRef} className="relative z-50">
       <div className="input input-bordered flex w-64 items-center gap-2 rounded-full border-current bg-transparent text-inherit">
         <input
           type="search"
@@ -92,7 +92,7 @@ export const SearchMusic = () => {
       {open && (
         <div
           id="music-search-results"
-          className="absolute right-0 top-full z-30 mt-3 w-80 rounded-3xl bg-neutral-800/90 p-4 text-white shadow-2xl backdrop-blur-md"
+          className="absolute right-0 top-full z-30 mt-3 w-80 rounded-3xl bg-neutral-800/50 p-4 text-white shadow-2xl backdrop-blur-xl"
         >
           <h3 className="mb-3 text-base font-bold">
             {query.trim() ? "Search results" : "Recent search"}

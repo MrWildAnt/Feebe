@@ -8,7 +8,6 @@ import { Hero } from "./Hero";
 export const Dashboard = () => {
   return (
     <div className="min-h-screen w-full overflow-x-clip">
-      <PlayerProvider>
       <Sidebar />
       <LeftBar />
       <Hero />
@@ -17,7 +16,6 @@ export const Dashboard = () => {
         <h1 className="font-bold text-3xl text-white">Trending by type</h1>
         <MusicLibrary/>
       </div>
-      </PlayerProvider>
     </div>
   );
 };
