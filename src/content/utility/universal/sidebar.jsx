@@ -63,7 +63,7 @@ export const Sidebar = () => {
   return (
     <div
       ref={wrapRef}
-      className="fixed h-130 top-36 right-5 z-50 flex items-start pointer-events-none"
+      className="fixed h-130 top-36 right-5 z-20 flex items-start pointer-events-none"
       style={{
         opacity: 0,
         transform: `translateX(${closedX}px)`,
