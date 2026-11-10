@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
+import { animate } from "animejs";
 import "./dashboard.css";
 import { Disk } from "../../utility/hero/disk.jsx";
 import { Navbar } from "../../utility/hero/navbar.jsx";
@@ -26,17 +27,6 @@ const AddonButton = ({ icon, title, isCentered }) => (
     <Icon icon={icon} className="text-4xl text-inherit font-bold invert" />
   </div>
 );
-
-// Loading + error sudah ditangani PlayerProvider
-export const Hero = () => <HeroPlayer />;
-
-const HeroPlayer = () => {
-  const { tracks, track, isPlaying, onSelect, audioRef, gainRef, levelRef } =
-    usePlayer();
-
-<<<<<<< HEAD
-// Navbar settings
-const NAV_FADE_START = 0.6; // navbar bg + bars start fading in at this scroll progress
 
 // Running text: hanya bergerak kalau isinya lebih lebar dari kotak (anime.js)
 const Marquee = ({ children, className = "", speed = 60, gap = 64 }) => {
@@ -114,40 +104,13 @@ const Marquee = ({ children, className = "", speed = 60, gap = 64 }) => {
   );
 };
 
-// Loads the tracks (local now, Supabase later), then mounts the player
-export const Hero = () => {
-  const [tracks, setTracks] = useState(null);
-  const [error, setError] = useState(null);
+// Loading + error sudah ditangani PlayerProvider
+export const Hero = () => <HeroPlayer />;
 
-  useEffect(() => {
-    let cancelled = false;
+const HeroPlayer = () => {
+  const { tracks, track, isPlaying, onSelect, audioRef, gainRef, levelRef } =
+    usePlayer();
 
-    fetchTracks()
-      .then((list) => {
-        if (!cancelled) setTracks(list);
-      })
-      .catch((err) => {
-        console.error("Could not load tracks:", err);
-        if (!cancelled) setError(err);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  if (error) return <div className="p-10">Could not load tracks.</div>;
-  if (!tracks) return <div className="min-h-screen w-full" />; // loading screen
-  if (tracks.length === 0) return <div className="p-10">No tracks yet.</div>;
-
-  return <HeroPlayer tracks={tracks} />;
-};
-
-const HeroPlayer = ({ tracks }) => {
-  const [track, setTrack] = useState(tracks[0]);
-  const [isPlaying, setIsPlaying] = useState(true);
-=======
->>>>>>> frontend
   const [isCentered, setIsCentered] = useState(false);
   const canvasRef = useRef(null);
   const navCanvasRef = useRef(null);
@@ -222,9 +185,12 @@ const HeroPlayer = ({ tracks }) => {
                       : "left-80 bottom-[40%] delay-800"
                   }`}
       >
-        
         <h2
-          className={`font-base text-3xl text-inherit transition-[opacity,visibility] duration-300 ease-in-out ${isCentered ? "invisible opacity-0 pointer-events-none" : "visible opacity-100 delay-1000"}`}
+          className={`font-base text-3xl text-inherit transition-[opacity,visibility] duration-300 ease-in-out ${
+            isCentered
+              ? "invisible opacity-0 pointer-events-none"
+              : "visible opacity-100 delay-1000"
+          }`}
         >
           Now Playing
         </h2>

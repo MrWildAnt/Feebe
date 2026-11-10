@@ -24,7 +24,7 @@ function App() {
       </Route>
       <Route path="/login" element={<LoginRegister mode="login" />} />
       <Route path="/registration" element={<LoginRegister mode="register" />} />
-      {/* <Route path="/add" element={<AdminDashboard />} /> */}
+      <Route path="/add" element={<AdminDashboard />} />
       <Route path="*" element={<div>404 - Page not found</div>} />
     </Routes>
   )
