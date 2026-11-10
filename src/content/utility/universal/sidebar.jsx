@@ -105,7 +105,9 @@ export const Sidebar = () => {
             <Icon
               icon="cuida:maximize-outline"
               className="h-6 w-6 hover:text-white/70 transition cursor-pointer"
-              onClick={() => navigate("/focused")}
+              onClick={
+                () => navigate("/focused")
+              }
             />
           </div>
 
