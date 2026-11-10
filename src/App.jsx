@@ -4,7 +4,7 @@ import Dashboard from './content/pages/dashboard/Dashboard.jsx'
 import FullPlayer from './content/pages/focused/FullPlayer.jsx'
 import { PlayerProvider } from "./content/utility/universal/PlayerContext.jsx";
 import LoginRegister from './content/pages/registration/LoginRegister.jsx'
-// import AdminDashboard from './content/pages/musiccontrol/AdminDashboard.jsx'
+import AdminDashboard from './content/pages/musiccontrol/AdminDashboard.jsx'
 
 function MusicExperience() {
   return (

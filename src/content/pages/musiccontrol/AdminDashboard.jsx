@@ -1,23 +1,23 @@
-// import { useEffect, useRef, useState } from "react";
-// import { Icon } from "@iconify/react";
-// import { FastAverageColor } from "fast-average-color";
-// import { supabase } from "../../../lib/supabase.js";
-// import {
-//   fetchTracks,
-//   createTrack,
-//   updateTrack,
-//   deleteTrack,
-//   uploadTrackFile,
-// } from "../../data/tracks.jsx";
+import { useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import { FastAverageColor } from "fast-average-color";
+import { supabase } from "../../../lib/supabase.js";
+import {
+  fetchTracks,
+  createTrack,
+  updateTrack,
+  deleteTrack,
+  uploadTrackFile,
+} from "../../data/tracks.jsx";
 
 const EMPTY_SONG = { id: null, title: "", artist: "", author: "", cover: "", audio: "" };
 const EMPTY_AUTHOR = { id: null, name: "", bio: "" };
 
-// const panel = "rounded-2xl bg-white/70 p-5 text-black shadow-xl backdrop-blur-md";
-// const field =
-//   "w-full rounded-xl border border-black/20 bg-white/80 px-3 py-2 text-sm outline-none focus:border-black";
-// const pill =
-//   "flex cursor-pointer items-center gap-1 rounded-full border border-black/30 px-3 py-1 text-xs font-medium transition hover:bg-black hover:text-white disabled:opacity-40";
+const panel = "rounded-2xl bg-white/70 p-5 text-black shadow-xl backdrop-blur-md";
+const field =
+  "w-full rounded-xl border border-black/20 bg-white/80 px-3 py-2 text-sm outline-none focus:border-black";
+const pill =
+  "flex cursor-pointer items-center gap-1 rounded-full border border-black/30 px-3 py-1 text-xs font-medium transition hover:bg-black hover:text-white disabled:opacity-40";
 
 export const AdminDashboard = ({ currentTrack }) => {
   const [songs, setSongs] = useState([]);
@@ -41,10 +41,10 @@ export const AdminDashboard = ({ currentTrack }) => {
   const audioRef = useRef(null);
   const active = playing || currentTrack || songs[0];
 
-//   const notify = (text, error = false) => {
-//     setMsg({ text, error });
-//     setTimeout(() => setMsg(null), 3500);
-//   };
+  const notify = (text, error = false) => {
+    setMsg({ text, error });
+    setTimeout(() => setMsg(null), 3500);
+  };
 
   const loadSongs = async () => {
     try {
@@ -121,12 +121,12 @@ export const AdminDashboard = ({ currentTrack }) => {
     }
   };
 
-//   useEffect(() => {
-//     const a = audioRef.current;
-//     if (!a || !playing) return;
-//     if (isPlaying) a.play().catch(() => setIsPlaying(false));
-//     else a.pause();
-//   }, [isPlaying, playing]);
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a || !playing) return;
+    if (isPlaying) a.play().catch(() => setIsPlaying(false));
+    else a.pause();
+  }, [isPlaying, playing]);
 
   const saveSong = async (e) => {
     e.preventDefault();
@@ -150,62 +150,62 @@ export const AdminDashboard = ({ currentTrack }) => {
       if (isNew) await createTrack(data);
       else await updateTrack(songForm.id, data);
 
-//       notify(isNew ? "Song added." : "Song updated.");
-//       closeSongForm();
-//       await loadSongs();
-//     } catch (err) {
-//       notify(err.message, true);
-//     } finally {
-//       setBusy(false);
-//     }
-//   };
+      notify(isNew ? "Song added." : "Song updated.");
+      closeSongForm();
+      await loadSongs();
+    } catch (err) {
+      notify(err.message, true);
+    } finally {
+      setBusy(false);
+    }
+  };
 
-//   const removeSong = async (song) => {
-//     if (!confirm(`Delete "${song.title}"?`)) return;
-//     try {
-//       await deleteTrack(song.id);
-//       if (playing?.id === song.id) {
-//         setPlaying(null);
-//         setIsPlaying(false);
-//       }
-//       notify("Song deleted.");
-//       await loadSongs();
-//     } catch (err) {
-//       notify(err.message, true);
-//     }
-//   };
+  const removeSong = async (song) => {
+    if (!confirm(`Delete "${song.title}"?`)) return;
+    try {
+      await deleteTrack(song.id);
+      if (playing?.id === song.id) {
+        setPlaying(null);
+        setIsPlaying(false);
+      }
+      notify("Song deleted.");
+      await loadSongs();
+    } catch (err) {
+      notify(err.message, true);
+    }
+  };
 
-//   const closeSongForm = () => {
-//     setSongForm(null);
-//     setCoverFile(null);
-//     setAudioFile(null);
-//   };
+  const closeSongForm = () => {
+    setSongForm(null);
+    setCoverFile(null);
+    setAudioFile(null);
+  };
 
   const saveAuthor = async (e) => {
     e.preventDefault();
     const name = authorForm.name.trim();
     if (!name) return notify("Author name is required.", true);
 
-//     const row = { name, bio: authorForm.bio.trim() };
-//     const q = authorForm.id
-//       ? supabase.from("authors").update(row).eq("id", authorForm.id)
-//       : supabase.from("authors").insert(row);
-//     const { error } = await q;
-//     if (error) return notify(error.message, true);
+    const row = { name, bio: authorForm.bio.trim() };
+    const q = authorForm.id
+      ? supabase.from("authors").update(row).eq("id", authorForm.id)
+      : supabase.from("authors").insert(row);
+    const { error } = await q;
+    if (error) return notify(error.message, true);
 
-//     notify(authorForm.id ? "Author updated." : "Author added.");
-//     setAuthorForm(EMPTY_AUTHOR);
-//     loadAuthors();
-//   };
+    notify(authorForm.id ? "Author updated." : "Author added.");
+    setAuthorForm(EMPTY_AUTHOR);
+    loadAuthors();
+  };
 
-//   const removeAuthor = async (author) => {
-//     if (!confirm(`Delete author "${author.name}"?`)) return;
-//     const { error } = await supabase.from("authors").delete().eq("id", author.id);
-//     if (error) return notify(error.message, true);
-//     notify("Author deleted.");
-//     if (authorForm.id === author.id) setAuthorForm(EMPTY_AUTHOR);
-//     loadAuthors();
-//   };
+  const removeAuthor = async (author) => {
+    if (!confirm(`Delete author "${author.name}"?`)) return;
+    const { error } = await supabase.from("authors").delete().eq("id", author.id);
+    if (error) return notify(error.message, true);
+    notify("Author deleted.");
+    if (authorForm.id === author.id) setAuthorForm(EMPTY_AUTHOR);
+    loadAuthors();
+  };
 
   const endColor = bg.isDark ? "#E0F2FE" : "#000000";
 
@@ -248,16 +248,16 @@ export const AdminDashboard = ({ currentTrack }) => {
         )}
       </header>
 
-//       {msg && (
-//         <div
-//           role="status"
-//           className={`fixed top-5 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2 text-sm font-medium shadow-lg ${
-//             msg.error ? "bg-red-600 text-white" : "bg-black text-white"
-//           }`}
-//         >
-//           {msg.text}
-//         </div>
-//       )}
+      {msg && (
+        <div
+          role="status"
+          className={`fixed top-5 left-1/2 z-50 -translate-x-1/2 rounded-full px-5 py-2 text-sm font-medium shadow-lg ${
+            msg.error ? "bg-red-600 text-white" : "bg-black text-white"
+          }`}
+        >
+          {msg.text}
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         {/* Manage song */}
@@ -580,39 +580,39 @@ export const AdminDashboard = ({ currentTrack }) => {
               ))}
             </select>
 
-//             <label className="text-sm">
-//               Cover image {songForm.id !== null && "(leave empty to keep current)"}
-//               <input
-//                 type="file"
-//                 accept="image/*"
-//                 className={`${field} mt-1`}
-//                 onChange={(e) => setCoverFile(e.target.files[0] ?? null)}
-//               />
-//             </label>
+            <label className="text-sm">
+              Cover image {songForm.id !== null && "(leave empty to keep current)"}
+              <input
+                type="file"
+                accept="image/*"
+                className={`${field} mt-1`}
+                onChange={(e) => setCoverFile(e.target.files[0] ?? null)}
+              />
+            </label>
 
-//             <label className="text-sm">
-//               Audio file {songForm.id !== null && "(leave empty to keep current)"}
-//               <input
-//                 type="file"
-//                 accept="audio/*"
-//                 className={`${field} mt-1`}
-//                 onChange={(e) => setAudioFile(e.target.files[0] ?? null)}
-//               />
-//             </label>
+            <label className="text-sm">
+              Audio file {songForm.id !== null && "(leave empty to keep current)"}
+              <input
+                type="file"
+                accept="audio/*"
+                className={`${field} mt-1`}
+                onChange={(e) => setAudioFile(e.target.files[0] ?? null)}
+              />
+            </label>
 
-//             <div className="mt-2 flex justify-end gap-2">
-//               <button type="button" className={pill} onClick={closeSongForm}>
-//                 Cancel
-//               </button>
-//               <button type="submit" className={pill} disabled={busy}>
-//                 {busy ? "Saving..." : "Save song"}
-//               </button>
-//             </div>
-//           </form>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
+            <div className="mt-2 flex justify-end gap-2">
+              <button type="button" className={pill} onClick={closeSongForm}>
+                Cancel
+              </button>
+              <button type="submit" className={pill} disabled={busy}>
+                {busy ? "Saving..." : "Save song"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default AdminDashboard;

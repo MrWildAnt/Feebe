@@ -8,8 +8,8 @@ import { useCoverColor } from "./useCoverColor.jsx";
 import SyncedLyrics from "../../pages/focused/SyncedLyrics.jsx";
 import { LYRICS } from "../../data/lyrics.js";
 
-const DUMMY_LYRICS =
-  "wajahmu gemilang\npelan\nlembut menembus\nhutan hujan\nku mencintaimu dalam\ngaun baja\npada\nperayaan~perayaan\n\nkau\nmembuatku\nmenjadi\ntak berdaya\n\nkau\nmembuatku\nmenjadi\ntak berdaya\n\nkau\nmembuatku\nmenjadi\ntak berdaya";
+const NO_LYRICS =
+  "Lirik tidak tersedia untuk lagu ini.";
 
 const HAS_TIMESTAMP = /\[\d{1,2}:\d{2}(?:[.:]\d{1,3})?\]/;
 
@@ -34,7 +34,7 @@ export const Sidebar = () => {
   const lyricsGradient = `linear-gradient(135deg, ${bg.hex} 0%, ${endColor} 300%)`;
 
   const rawLyrics =
-    track.lrc ?? track.lyrics ?? LYRICS[track.id] ?? DUMMY_LYRICS;
+    track.lrc ?? track.lyrics ?? LYRICS[track.id] ?? NO_LYRICS;
   const isSynced = HAS_TIMESTAMP.test(rawLyrics);
 
   // Warna & ukuran lirik (dipakai SyncedLyrics.css)
